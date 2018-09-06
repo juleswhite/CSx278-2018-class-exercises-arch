@@ -12,32 +12,30 @@
       :students))
 
 
-;; Architecture v1
+;; Architecture v2
 ;;
-;; 
+;;
 
-(defn assignment-indexes [course-data]
-  (take (count (assignment-ids course-data)) (range 0 10000)))
+(defn table-row
+  "Given a set of column names and a list, converts the list into a map.
 
-(defn assignment-score [student assignment-index]
-  (nth (:scores student) assignment-index))
+   Example: (table-row [:a :b] [0 1]) => {:a 0 :b 1}
 
-(defn assignment-scores-by-id [course-data student]
-  (let [ids  (assignment-ids course-data)
-        idxs (assignment-indexes course-data)]
-    (map (fn [asgn-idx] 
-             [(nth ids asgn-idx) 
-              (assignment-score student asgn-idx)])    
-         (assignment-indexes course-data))))
-
-(defn assignment-scores-lookup [course-data student]
-  (assoc
-    (into {}  (assignment-scores-by-id course-data student))
-    :name (:name student)))
+  "
+  [columns data]
+  (reduce (fn [m [index id]] (assoc m id (nth data index)))
+          {}
+          (map-indexed list columns)))
 
 (defn print-scores-table [course-data]
-  (let [data (map #(assignment-scores-lookup course-data %) (students course-data))]
-     (pprint/print-table (cons :name (assignment-ids course-data)) data)))
+  (let [students    (students course-data)
+        asgnids     (assignment-ids course-data)
+        scores      (map :scores students)
+        name-scores (map #(cons (:name %2) %1) scores students)
+        columns     (cons :name asgnids)
+        table-data  (map #(table-row columns %) name-scores)]
+    (pprint/print-table columns table-data)))
+
 
 
 ;; Example Usage:

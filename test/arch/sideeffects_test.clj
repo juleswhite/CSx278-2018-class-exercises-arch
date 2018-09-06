@@ -16,6 +16,20 @@
 (defn file-names [d]
   (map #(.getName %) (fs/list-dir d)))
 
+
+;; This version doesn't actually have to create files and clean
+;; them up!
+(deftest sync-instructions-test
+  (testing "That we have correct synchronization / diffing logic"
+    (is (= [{:src (io/as-file "/foo/bar")
+             :dst (io/as-file "/bar/bar")}]
+           (sync-instructions #{(io/as-file "/foo/bar")}
+                              #{}
+                              (io/as-file "/foo")
+                              (io/as-file "/bar"))))))
+
+;; I could make this an integration test so that I wouldn't
+;; worry about running it over and over
 (deftest sync-directories-test
   (testing "The correct synchronization of directories"
     (when (fs/exists? dir1)

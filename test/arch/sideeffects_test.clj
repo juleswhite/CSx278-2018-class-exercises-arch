@@ -17,16 +17,17 @@
   (map #(.getName %) (fs/list-dir d)))
 
 
-;; This version doesn't actually have to create files and clean
-;; them up!
+;; This version doesn't make the assumption that we are working
+;; with Java file objects and could be generalized to different
+;; copy implementations, etc. 
 (deftest sync-instructions-test
   (testing "That we have correct synchronization / diffing logic"
-    (is (= [{:src (io/as-file "/foo/bar")
-             :dst (io/as-file "/bar/bar")}]
-           (sync-instructions #{(io/as-file "/foo/bar")}
+    (is (= [{:src "/foo/bar"
+             :dst [">>bar" "/foo/bar"]}]
+           (sync-instructions #{"/foo/bar"}
                               #{}
-                              (io/as-file "/foo")
-                              (io/as-file "/bar"))))))
+                              #(list ">>foo" %)
+                              #(list ">>bar" %))))))
 
 ;; I could make this an integration test so that I wouldn't
 ;; worry about running it over and over
